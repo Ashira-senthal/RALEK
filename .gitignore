@@ -1,0 +1,29 @@
+# Instructions and working notes
+git.md
+github.md
+AGENTS.md
+.agent/
+WORKING.md
+M2A — Merchant-to-Agent Bridge — Project Analysis.md
+.obsidian/
+
+# Python & virtual environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+
+# Audit logs / runtime artifacts (keep git clean)
+*.log
+audit_trail.jsonl
+
+# Testing & cache
+.pytest_cache/
+.coverage
+htmlcov/

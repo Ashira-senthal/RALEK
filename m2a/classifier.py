@@ -36,7 +36,7 @@ Intent Labels:
 from dataclasses import dataclass, asdict
 import re
 
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
@@ -127,15 +127,27 @@ class ClassificationResult:
 # ---------------------------------------------------------------------------
 
 def _build_pipeline() -> Pipeline:
-    """Train and return the TF-IDF + Logistic Regression pipeline."""
+    """Train and return the TF-IDF + Logistic Regression pipeline.
+    Uses FeatureUnion to combine word n-grams (1-2) with character sub-word n-grams (3-5),
+    making the classifier robust against typos and spelling mistakes.
+    """
     pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            ngram_range=(1, 2),   # Unigrams and bigrams
-            lowercase=True,
-            strip_accents="unicode",
-            analyzer="word",
-            max_features=5000,
-        )),
+        ("features", FeatureUnion([
+            ("word", TfidfVectorizer(
+                ngram_range=(1, 2),
+                lowercase=True,
+                strip_accents="unicode",
+                analyzer="word",
+                max_features=5000,
+            )),
+            ("char", TfidfVectorizer(
+                ngram_range=(3, 5),
+                lowercase=True,
+                strip_accents="unicode",
+                analyzer="char_wb",
+                max_features=5000,
+            )),
+        ])),
         ("clf", LogisticRegression(
             max_iter=1000,
             C=5.0,

@@ -5,6 +5,10 @@ Labeled examples for training the Logistic Regression intent classifier.
 These cover natural language variations an AI agent might use when querying
 a product endpoint without providing a structured intent header.
 
+NOTE: For the time being, the training data is limited to a core synthetic corpus
+for prototype scope (~105 examples across 5 classes). In production, this can be
+expanded with real merchant traffic logs and query analytics.
+
 Intent Labels:
     BUY     - Agent wants to purchase / transact
     STOCK   - Agent wants stock / availability info

@@ -6,3 +6,4 @@ tiktoken>=0.9
 python-dotenv>=1.1
 requests>=2.32
 pytest>=8.3
+nlpaug>=1.1

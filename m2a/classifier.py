@@ -84,8 +84,11 @@ DETERMINISTIC_INTENT_MAP = {
     "describe": "BROWSE",
 }
 
-# Minimum ML confidence to classify; below this → AMBIGUOUS
-CONFIDENCE_THRESHOLD = 0.60
+# Minimum ML confidence to classify; below this → AMBIGUOUS.
+# Set to 0.45 to accommodate heavily-misspelled short queries where
+# character n-grams still carry enough signal for correct classification.
+# Random chance on 5 classes = 0.20, so 0.45 is still >2x random.
+CONFIDENCE_THRESHOLD = 0.45
 
 # What an AMBIGUOUS response tells the agent it can do
 AMBIGUOUS_ACTIONS = [

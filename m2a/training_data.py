@@ -5,9 +5,10 @@ Labeled examples for training the Logistic Regression intent classifier.
 These cover natural language variations an AI agent might use when querying
 a product endpoint without providing a structured intent header.
 
-NOTE: For the time being, the training data is limited to a core synthetic corpus
-for prototype scope (~105 examples across 5 classes). In production, this can be
-expanded with real merchant traffic logs and query analytics.
+The base dataset of ~105 hand-curated examples is augmented at import time
+using nlpaug (keyboard proximity, random character mutation, OCR-style confusion)
+to generate ~500+ typo variants. This makes the classifier robust against
+real-world spelling mistakes without needing a large external dataset.
 
 Intent Labels:
     BUY     - Agent wants to purchase / transact
@@ -17,7 +18,13 @@ Intent Labels:
     BROWSE  - Agent wants a general overview / discovery
 """
 
-TRAINING_DATA = [
+import random
+
+# -------------------------------------------------------------------------
+# Base training corpus — hand-curated, high-quality, domain-specific
+# -------------------------------------------------------------------------
+
+BASE_TRAINING_DATA = [
     # -------------------------------------------------------------------------
     # BUY — Purchase intent
     # -------------------------------------------------------------------------
@@ -93,6 +100,12 @@ TRAINING_DATA = [
     ("available sizes", "SPECS"),
     ("product measurements", "SPECS"),
     ("what are the exact measurements", "SPECS"),
+    ("what is the weight of this item", "SPECS"),
+    ("how much does this weigh", "SPECS"),
+    ("weight of this product", "SPECS"),
+    ("tell me the weight", "SPECS"),
+    ("how many grams is this", "SPECS"),
+    ("what is the total weight", "SPECS"),
 
     # -------------------------------------------------------------------------
     # COMPARE — Comparative / evaluation intent
@@ -143,6 +156,90 @@ TRAINING_DATA = [
     ("give me everything about this product", "BROWSE"),
     ("all information about this", "BROWSE"),
 ]
+
+
+# -------------------------------------------------------------------------
+# Typo augmentation via nlpaug
+# -------------------------------------------------------------------------
+
+def _augment_training_data(base_data, augments_per_example=4, seed=42):
+    """Generate typo-augmented training examples using nlpaug.
+
+    Uses three augmentation strategies:
+      1. KeyboardAug  — QWERTY proximity typos (e.g., 'buy' → 'biy')
+      2. RandomCharAug — random char insert/delete/swap (e.g., 'purchase' → 'pruchase')
+      3. OcrAug       — OCR-style confusion (e.g., '0' ↔ 'O', 'l' ↔ '1')
+
+    Args:
+        base_data: list of (text, label) tuples.
+        augments_per_example: number of augmented variants per original example.
+        seed: random seed for reproducibility.
+
+    Returns:
+        Combined list of original + augmented (text, label) tuples.
+    """
+    try:
+        import nlpaug.augmenter.char as nac
+    except ImportError:
+        # nlpaug not installed — fall back to base data only.
+        # This ensures the module still works without nlpaug (e.g. in CI).
+        print("[M2A WARNING] nlpaug not installed — using base training data only.")
+        return base_data
+
+    random.seed(seed)
+
+    augmenters = [
+        nac.KeyboardAug(
+            aug_char_min=1, aug_char_max=2,
+            aug_word_min=1, aug_word_max=2,
+            include_special_char=False,
+            include_numeric=False,
+        ),
+        nac.RandomCharAug(
+            action="substitute",
+            aug_char_min=1, aug_char_max=2,
+            aug_word_min=1, aug_word_max=1,
+        ),
+        nac.OcrAug(
+            aug_char_min=1, aug_char_max=2,
+            aug_word_min=1, aug_word_max=1,
+        ),
+    ]
+
+    augmented = list(base_data)  # Start with all originals
+    seen = {text.lower() for text, _ in base_data}
+
+    for text, label in base_data:
+        generated = 0
+        attempts = 0
+        max_attempts = augments_per_example * 3  # Avoid infinite loops
+
+        while generated < augments_per_example and attempts < max_attempts:
+            attempts += 1
+            aug = random.choice(augmenters)
+            try:
+                variants = aug.augment(text, n=1)
+                if isinstance(variants, list):
+                    variant = variants[0]
+                else:
+                    variant = variants
+
+                # Skip duplicates and unchanged text
+                if variant.lower() not in seen and variant.lower() != text.lower():
+                    augmented.append((variant, label))
+                    seen.add(variant.lower())
+                    generated += 1
+            except Exception:
+                continue
+
+    return augmented
+
+
+# -------------------------------------------------------------------------
+# Build the final augmented dataset at import time
+# -------------------------------------------------------------------------
+
+TRAINING_DATA = _augment_training_data(BASE_TRAINING_DATA, augments_per_example=6, seed=42)
 
 # Convenience exports for the classifier
 TEXTS = [text for text, label in TRAINING_DATA]

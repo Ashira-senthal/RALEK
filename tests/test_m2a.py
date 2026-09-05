@@ -1,5 +1,6 @@
 import pytest
 import json
+from unittest.mock import patch
 from app import app
 from m2a.detector import detect_client
 from m2a.classifier import classify_intent
@@ -57,13 +58,15 @@ def test_pruner():
     meta = pruned.get("_meta", {})
     assert meta["savings_percentage"] > 70.0
 
-def test_human_route(client):
+@patch('app.log_interaction')
+def test_human_route(mock_log, client):
     response = client.get("/")
     assert response.status_code == 200
     assert b"text/html" in response.headers["Content-Type"].encode('utf-8')
     assert b"M2A" in response.data
 
-def test_agent_catalog_route(client):
+@patch('app.log_interaction')
+def test_agent_catalog_route(mock_log, client):
     response = client.get("/", headers={"Signature-Agent": "1"})
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/vnd.m2a+json"
@@ -72,7 +75,8 @@ def test_agent_catalog_route(client):
     assert "catalog" in data
     assert len(data["catalog"]) == 4
 
-def test_agent_buy_route(client):
+@patch('app.log_interaction')
+def test_agent_buy_route(mock_log, client):
     response = client.get("/product/prod_001?intent=BUY", headers={"Signature-Agent": "1"})
     assert response.status_code == 200
     

@@ -11,6 +11,12 @@ Routes:
     GET /health            → Health check endpoint
 """
 
+import os
+import time
+import tiktoken
+from flask_cors import CORS
+from m2a.utils import HTMLTextExtractor
+
 import json
 from flask import Flask, request, render_template, jsonify, Response, make_response
 
@@ -23,6 +29,7 @@ from m2a.audit import log_interaction, get_audit_stats, read_audit_log
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 # ---------------------------------------------------------------------------
@@ -213,10 +220,6 @@ def dashboard():
 @app.route("/api/benchmark")
 def api_benchmark():
     """Runs a live benchmark comparing HTML vs M2A JSON for the detailed dashboard."""
-    import time
-    import tiktoken
-    from html.parser import HTMLParser
-    
     enc = tiktoken.get_encoding("cl100k_base")
     product_id = request.args.get("product_id", "prod_001")
     query = request.args.get("query", "is this in stock?")
@@ -228,23 +231,14 @@ def api_benchmark():
     html_latency = (time.time() - start) * 1000
     
     # Strip tags for a realistic agent DOM parse
-    class HTMLTextExtractor(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.res = []
-        def handle_data(self, d):
-            if d.strip():
-                self.res.append(d.strip())
-    
     extractor = HTMLTextExtractor()
     extractor.feed(html_content)
-    extracted_html_text = ' '.join(extractor.res)
+    extracted_html_text = extractor.get_text()
     html_tokens = len(enc.encode(extracted_html_text))
     html_size_kb = round(len(html_content.encode('utf-8')) / 1024, 2)
     
     # 2. Simulate JSON Request
     start = time.time()
-    from collections import namedtuple
     DetectionMock = namedtuple('DetectionMock', ['is_agent', 'agent_intent', 'to_dict'])
     det = DetectionMock(is_agent=True, agent_intent=None, to_dict=lambda: {})
     
@@ -306,4 +300,5 @@ def api_benchmark():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    app.run(debug=debug_mode, host="0.0.0.0", port=5000)

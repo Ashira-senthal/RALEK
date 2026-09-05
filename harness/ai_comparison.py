@@ -3,24 +3,16 @@ import requests
 import json
 import time
 import tiktoken
-from html.parser import HTMLParser
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from m2a.utils import HTMLTextExtractor
 
 BASE_URL = "http://localhost:5000"
 enc = tiktoken.get_encoding("cl100k_base")
 
 def count_tokens(text):
     return len(enc.encode(text))
-
-class HTMLTextExtractor(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.result = []
-    def handle_data(self, data):
-        text = data.strip()
-        if text:
-            self.result.append(text)
-    def get_text(self):
-        return ' '.join(self.result)
 
 def simulate_llm_processing(prompt_text, target_keyword):
     """Simulates an LLM 'reading' context to find an answer."""
@@ -34,13 +26,13 @@ def simulate_llm_processing(prompt_text, target_keyword):
     duration = time.time() - start_time
     return tokens, duration, found
 
-def print_box(title):
+def print_header(title):
     print("\n" + "="*70)
     print(f" 🤖 {title}")
     print("="*70)
 
 def main():
-    print_box("SCENARIO: AI Agent wants to find out if 'AuraX Pro' is in stock.")
+    print_header("SCENARIO: AI Agent wants to find out if 'AuraX Pro' is in stock.")
     product_url = f"{BASE_URL}/product/prod_001"
     
     # ---------------------------------------------------------
@@ -77,7 +69,7 @@ def main():
     # ---------------------------------------------------------
     # 2. M2A APPROACH (With Middleware)
     # ---------------------------------------------------------
-    print_box("✅ M2A AGENT (With Middleware)")
+    print_header("✅ M2A AGENT (With Middleware)")
     print("Action: Fetching URL with Agent Headers and Natural Language query...")
     
     # Fetch JSON via content negotiation
@@ -109,7 +101,7 @@ def main():
     # ---------------------------------------------------------
     # SUMMARY
     # ---------------------------------------------------------
-    print_box("📊 PERFORMANCE COMPARISON")
+    print_header("📊 PERFORMANCE COMPARISON")
     token_reduction = (1 - (tokens_json / tokens_html)) * 100
     speed_increase = process_time_html / process_time_json
     

@@ -72,7 +72,11 @@
 
     <!-- HERO -->
     <section class="product-hero">
-        <img class="hero-img" src="{{ product.images[0] }}" alt="{{ product.name }}">
+        {% if product.images %}
+            <img class="hero-img" src="{{ product.images[0] }}" alt="{{ product.name }}">
+            {% else %}
+            <img class="hero-img" src="" alt="{{ product.name }}">
+            {% endif %}
         <div class="product-hero-content">
             <div class="product-category" style="color: #fff;">{{ product.category }}</div>
             <h1 style="font-size: 5vw; margin-bottom: 1rem;">{{ product.name }}</h1>

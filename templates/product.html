@@ -3,165 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ product.name }} — M2A Store</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ product.name }} | RALEK M2A</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cinematic.css') }}">
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        .product-hero {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 5vw;
+        }
+        
+        .product-hero img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.6;
+        }
+        
+        .product-hero-content {
+            position: relative;
+            z-index: 1;
+            width: 50%;
+        }
+        
+        .specs-section {
+            padding: 10vw 5vw;
+            background: #0a0a0a;
+            display: flex;
+            gap: 4rem;
+        }
+        
+        .specs-text {
+            flex: 1;
+        }
+        
+        .specs-table {
+            flex: 1;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .specs-table th, .specs-table td {
+            padding: 1rem 0;
+            border-bottom: 1px solid #333;
+            text-align: left;
+        }
+        
+        .specs-table th {
+            color: #888;
+            font-weight: normal;
+        }
+    </style>
 </head>
 <body>
-    <div class="bg-grid"></div>
+    <div class="agent-banner">
+        HUMAN VIEW ACTIVE.
+    </div>
 
-    <header class="header">
-        <div class="header-inner">
-            <div class="logo">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">M2A</span>
-                <span class="logo-sub">store</span>
-            </div>
-            <nav class="nav">
-                <a href="/" class="nav-link">← Back to Products</a>
-                <a href="/audit" class="nav-link">Audit Trail</a>
-            </nav>
+    <!-- HERO -->
+    <section class="product-hero">
+        <img class="hero-img" src="{{ product.image_url }}" alt="{{ product.name }}">
+        <div class="product-hero-content">
+            <div class="product-category" style="color: #fff;">{{ product.category }}</div>
+            <h1 style="font-size: 5vw; margin-bottom: 1rem;">{{ product.name }}</h1>
+            <div class="product-price" style="font-size: 2rem; color: var(--accent);">₹{{ "{:,.0f}".format(product.price) }}</div>
+            <a href="#" class="btn-cinematic" onclick="alert('Agent checkout integration point')">Buy Now</a>
         </div>
-    </header>
+    </section>
 
-    <main class="container">
-        <div class="product-detail">
-            <div class="product-detail-top glass-card">
-                <div class="product-detail-image">
-                    <div class="product-image-placeholder large">
-                        {% if 'Headphones' in product.name %}🎧
-                        {% elif 'Chair' in product.name %}🪑
-                        {% elif 'Shoes' in product.name %}👟
-                        {% elif 'Keyboard' in product.name %}⌨️
-                        {% else %}📦{% endif %}
-                    </div>
-                </div>
-
-                <div class="product-detail-info">
-                    <div class="product-category">{{ product.category }}</div>
-                    <h1 class="product-detail-name">{{ product.name }}</h1>
-                    <div class="product-brand-detail">by {{ product.brand }}</div>
-
-                    <div class="product-rating-detail">
-                        <span class="stars-large">★</span> {{ product.rating }}
-                        <span class="review-count">({{ product.reviews_count }} reviews)</span>
-                    </div>
-
-                    <div class="product-price-detail">
-                        <span class="currency">₹</span>{{ "{:,.0f}".format(product.price) }}
-                    </div>
-
-                    <p class="product-desc-detail">{{ product.description }}</p>
-
-                    <div class="product-options">
-                        {% if product.colors %}
-                        <div class="option-group">
-                            <label>Colors</label>
-                            <div class="option-chips">
-                                {% for color in product.colors %}
-                                <span class="chip">{{ color }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.sizes %}
-                        <div class="option-group">
-                            <label>Sizes</label>
-                            <div class="option-chips">
-                                {% for size in product.sizes %}
-                                <span class="chip">{{ size }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="product-stock">
-                        {% if product.stock_count > 0 %}
-                        <span class="stock-badge in-stock">✓ In Stock ({{ product.stock_count }} units)</span>
-                        {% else %}
-                        <span class="stock-badge out-stock">✗ Out of Stock</span>
-                        {% endif %}
-                    </div>
-
-                    {% if product.stock_count > 0 %}
-                    <button class="btn btn-primary btn-large">Buy Now — ₹{{ "{:,.0f}".format(product.price) }}</button>
-                    {% else %}
-                    <button class="btn btn-secondary btn-large">Notify When Available</button>
-                    {% endif %}
-
-                    <div class="trust-badges">
-                        {% for badge in product.trust_badges %}
-                        <span class="trust-badge">{{ badge }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-detail-sections">
-                <div class="detail-section glass-card">
-                    <h3>📐 Specifications</h3>
-                    <table class="specs-table">
-                        <tr><td>Weight</td><td>{{ product.dimensions.weight_g }}g</td></tr>
-                        <tr><td>Dimensions</td><td>{{ product.dimensions.length_cm }} × {{ product.dimensions.width_cm }} × {{ product.dimensions.height_cm }} cm</td></tr>
-                        <tr><td>Materials</td><td>{{ product.materials | join(', ') }}</td></tr>
-                        <tr><td>SKU</td><td>{{ product.sku }}</td></tr>
-                    </table>
-                </div>
-
-                <div class="detail-section glass-card">
-                    <h3>🚚 Shipping</h3>
-                    <p>{{ product.shipping_info }}</p>
-                </div>
-
-                <div class="detail-section glass-card">
-                    <h3>↩️ Returns</h3>
-                    <p>{{ product.return_policy }}</p>
-                </div>
-            </div>
+    <!-- SPECS -->
+    <section class="specs-section">
+        <div class="specs-text">
+            <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Technical Details</h2>
+            <p class="product-desc">{{ product.description }}</p>
+            <p style="color: #666; margin-top: 2rem;">Stock Available: {{ product.stock }} units</p>
         </div>
-    </main>
+        <table class="specs-table">
+            <tbody>
+                {% for key, value in product.specs.items() %}
+                <tr>
+                    <th>{{ key|title }}</th>
+                    <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
 
-    <footer class="footer">
-        <div class="footer-inner">
-            <p>M2A — Merchant-to-Agent Bridge | Razorpay AI Buildathon 2026</p>
-        </div>
-    </footer>
-
-    <!-- Liquid Glass JS Dependencies -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid_glass.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="{{ url_for('static', filename='liquid_container.js') }}"></script>
-    <script src="{{ url_for('static', filename='liquid_button.js') }}"></script>
+    <!-- FOOTER -->
+    <section style="padding: 5vw; text-align: center; border-top: 1px solid #222;">
+        <a href="/" class="btn-cinematic" style="background: transparent; border: 1px solid var(--text-color); color: var(--text-color);">Back to Collection</a>
+    </section>
 
     <script>
-        // Convert the Buy button into a complex WebGL Liquid Glass button
-        document.addEventListener('DOMContentLoaded', () => {
-            const buyBtn = document.querySelector('.btn-primary.btn-large');
-            if (!buyBtn) return;
+        gsap.registerPlugin(ScrollTrigger);
 
-            const text = buyBtn.innerText.trim();
-            buyBtn.style.display = 'none'; // Hide DOM button
-
-            const glassContainer = new Container({
-                borderRadius: 24,
-                type: 'pill',
-                tintOpacity: 0.2
-            });
-
-            const glassBtn = new Button({
-                text: text,
-                size: 16,
-                type: 'pill',
-                onClick: () => {
-                    alert('Agent checkout initiated via WebGL interaction!');
-                }
-            });
-
-            glassContainer.addChild(glassBtn);
-            
-            // Insert it where the old button was
-            buyBtn.parentNode.insertBefore(glassContainer.element, buyBtn.nextSibling);
+        // Simple parallax for product hero
+        gsap.to(".hero-img", {
+            yPercent: 20,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".product-hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+        
+        gsap.to(".product-hero-content", {
+            yPercent: -20,
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".product-hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
         });
     </script>
 </body>

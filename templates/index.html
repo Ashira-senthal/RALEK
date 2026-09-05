@@ -3,157 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M2A Store — Merchant-to-Agent Bridge</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>M2A | Cinematic Dual-Reality Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cinematic.css') }}">
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 <body>
-    <div class="bg-grid"></div>
-    
-    <header class="header">
-        <div class="header-inner">
-            <div class="logo">
-                <span class="logo-icon">⚡</span>
-                <span class="logo-text">M2A</span>
-                <span class="logo-sub">store</span>
-            </div>
-            <nav class="nav">
-                <a href="/" class="nav-link active">Products</a>
-                <a href="/audit" class="nav-link">Audit Trail</a>
-                <a href="/health" class="nav-link">Status</a>
-            </nav>
-        </div>
-    </header>
+    <div class="agent-banner">
+        HUMAN VIEW ACTIVE. AGENT ENDPOINTS RETURN RAW JSON VIA CONTENT NEGOTIATION.
+    </div>
 
-    <main class="container">
-        <section class="hero">
-            <div class="hero-glass">
-                <h1 class="hero-title">Welcome to the Future of Commerce</h1>
-                <p class="hero-subtitle">
-                    This storefront serves <strong>two realities</strong> — 
-                    a rich visual experience for you (human), and a hyper-lightweight 
-                    data payload for AI agents. Same URL, same products, 
-                    <span class="highlight">95% fewer tokens</span>.
-                </p>
-                <div class="hero-badges">
-                    <span class="badge badge-glow">Razorpay Powered</span>
-                    <span class="badge">AI Buildathon 2026</span>
-                    <span class="badge">Token Optimized</span>
-                </div>
-            </div>
-        </section>
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
 
-        <section class="products-grid">
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" class="hero-bg" alt="Abstract Background">
+        <h1 class="hero-title">RALEK<br>M2A</h1>
+        <div class="hero-subtitle">The Merchant-to-Agent Bridge</div>
+    </section>
+
+    <!-- HORIZONTAL GALLERY -->
+    <section class="gallery-container">
+        <div class="gallery-track">
+            
             {% for product in products %}
-            <article class="product-card glass-card">
-                <div class="product-image-wrapper">
-                    <div class="product-image-placeholder">
-                        {% if 'Headphones' in product.name %}🎧
-                        {% elif 'Chair' in product.name %}🪑
-                        {% elif 'Shoes' in product.name %}👟
-                        {% elif 'Keyboard' in product.name %}⌨️
-                        {% else %}📦{% endif %}
+            <div class="product-panel">
+                <div class="product-card-cinematic">
+                    <div class="product-image-col">
+                        <img class="parallax-img" src="{{ product.image_url }}" alt="{{ product.name }}">
                     </div>
-                    {% if product.stock_count == 0 %}
-                    <div class="badge-overlay badge-out">Out of Stock</div>
-                    {% elif product.stock_count < 20 %}
-                    <div class="badge-overlay badge-low">Only {{ product.stock_count }} left</div>
-                    {% endif %}
-                </div>
-                
-                <div class="product-info">
-                    <div class="product-category">{{ product.category }}</div>
-                    <h2 class="product-name">{{ product.name }}</h2>
-                    <p class="product-desc">{{ product.description[:120] }}...</p>
-                    
-                    <div class="product-meta">
-                        <div class="product-rating">
-                            <span class="stars">★</span> {{ product.rating }} 
-                            <span class="review-count">({{ product.reviews_count }} reviews)</span>
-                        </div>
-                        <div class="product-brand">{{ product.brand }}</div>
-                    </div>
-
-                    <div class="product-footer">
-                        <div class="product-price">
-                            <span class="currency">₹</span>{{ "{:,.0f}".format(product.price) }}
-                        </div>
-                        <a href="/product/{{ product.id }}" class="btn btn-primary">
-                            {% if product.stock_count > 0 %}View Details{% else %}Notify Me{% endif %}
-                        </a>
-                    </div>
-
-                    <div class="trust-badges">
-                        {% for badge in product.trust_badges %}
-                        <span class="trust-badge">{{ badge }}</span>
-                        {% endfor %}
+                    <div class="product-info-col">
+                        <div class="product-category">ID: {{ product.id }} | Stock: {{ product.stock }}</div>
+                        <h2 class="product-name">{{ product.name }}</h2>
+                        <div class="product-price">₹{{ "{:,.0f}".format(product.price) }}</div>
+                        <p class="product-desc">{{ product.description }}</p>
+                        <a href="/product/{{ product.id }}" class="btn-cinematic">View Details</a>
                     </div>
                 </div>
-            </article>
+            </div>
+            {% endelse %}
+            <div class="product-panel">
+                <h2>No products found</h2>
+            </div>
             {% endfor %}
-        </section>
-
-        <section class="info-section glass-card">
-            <h2>🤖 Are you an AI Agent?</h2>
-            <p>Send your requests with the following header for an optimized payload:</p>
-            <code class="code-block">Accept: application/vnd.m2a+json</code>
-            <p>Or use structured intent headers:</p>
-            <code class="code-block">X-Agent-Intent: purchase | stock_check | specs | compare | browse</code>
-            <p>Or pass natural language queries:</p>
-            <code class="code-block">GET /product/prod_001?query=I want to buy this</code>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="footer-inner">
-            <p>M2A — Merchant-to-Agent Bridge | Razorpay AI Buildathon 2026</p>
-            <p class="footer-sub">Built for the AI Growth & Agentic Commerce Track</p>
+            
         </div>
-    </footer>
+    </section>
 
-    <!-- Liquid Glass JS Dependencies -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid_glass.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="{{ url_for('static', filename='liquid_container.js') }}"></script>
-    <script src="{{ url_for('static', filename='liquid_button.js') }}"></script>
+    <!-- FOOTER -->
+    <section class="hero-section" style="height: 50vh; background: #000;">
+        <h2 style="font-size: 3vw;">End of Collection</h2>
+        <div class="hero-subtitle">M2A Razorpay AI Buildathon 2026</div>
+    </section>
 
     <script>
-        // Convert standard action buttons into complex WebGL Liquid Glass buttons
-        document.addEventListener('DOMContentLoaded', () => {
-            const productFooters = document.querySelectorAll('.product-footer');
-            
-            productFooters.forEach(footer => {
-                const actionBtn = footer.querySelector('a.btn-primary');
-                if (!actionBtn) return;
+        gsap.registerPlugin(ScrollTrigger);
 
-                const href = actionBtn.getAttribute('href');
-                const text = actionBtn.innerText.trim();
-                
-                // Hide the standard DOM button
-                actionBtn.style.display = 'none';
+        // 1. Hero Parallax
+        gsap.to(".hero-bg", {
+            yPercent: 30,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".hero-section",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
 
-                // Create a nested liquid glass structure to make it complex to test
-                const glassContainer = new Container({
-                    borderRadius: 12,
-                    type: 'rounded',
-                    tintOpacity: 0.1
-                });
+        gsap.to(".hero-title", {
+            yPercent: 50,
+            opacity: 0,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".hero-section",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
 
-                const glassBtn = new Button({
-                    text: text,
-                    size: 14,
-                    type: 'rounded',
-                    onClick: () => {
-                        window.location.href = href;
+        // 2. Horizontal Scroll Gallery
+        const track = document.querySelector(".gallery-track");
+        const panels = gsap.utils.toArray(".product-panel");
+        
+        let scrollTween = gsap.to(panels, {
+            xPercent: -100 * (panels.length - 1),
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".gallery-container",
+                pin: true,
+                scrub: 1,
+                snap: {
+                    snapTo: 1 / (panels.length - 1),
+                    duration: {min: 0.2, max: 0.5},
+                    delay: 0.1,
+                    ease: "power1.inOut"
+                },
+                end: () => "+=" + track.offsetWidth
+            }
+        });
+
+        // 3. Parallax Images inside Horizontal Scroll
+        gsap.utils.toArray(".parallax-img").forEach((img, i) => {
+            gsap.fromTo(img, 
+                { x: "-10vw" },
+                {
+                    x: "10vw",
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".gallery-container",
+                        start: "top top",
+                        end: () => "+=" + track.offsetWidth,
+                        scrub: true
                     }
-                });
+                }
+            );
+        });
 
-                // Apply some basic layout fixing to the glass container
-                glassContainer.element.style.transform = 'scale(0.8)';
-                glassContainer.element.style.transformOrigin = 'right center';
-
-                glassContainer.addChild(glassBtn);
-                footer.appendChild(glassContainer.element);
-            });
+        // 4. Progress Bar
+        gsap.to(".scroll-progress-bar", {
+            width: "100%",
+            ease: "none",
+            scrollTrigger: {
+                scrub: 0.3
+            }
         });
     </script>
 </body>

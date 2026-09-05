@@ -3,183 +3,477 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M2A | Live Benchmark Dashboard</title>
+    <title>RALEK M2A | Live Hackathon Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --panel-bg: #111;
-            --text-color: #f0f0f0;
-            --accent: #d8b4fe;
-            --html-color: #ef4444;
-            --m2a-color: #10b981;
+            --bg-dark: #07090e;
+            --panel-bg: #0f172a;
+            --panel-border: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-purple: #c084fc;
+            --danger-red: #ef4444;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             font-family: 'Inter', system-ui, sans-serif;
-            margin: 0;
             padding: 2rem;
+            line-height: 1.5;
         }
-        h1 {
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 1.5rem;
             margin-bottom: 2rem;
-            border-bottom: 1px solid #333;
-            padding-bottom: 1rem;
         }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .panel {
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .badge-live::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success-green);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--success-green);
+        }
+
+        /* QUICK CONTROLS */
+        .controls-card {
             background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
             padding: 1.5rem;
-            border-radius: 4px;
-            border: 1px solid #222;
+            border-radius: 12px;
+            margin-bottom: 2rem;
         }
-        .controls {
-            grid-column: 1 / -1;
+
+        .controls-form {
             display: flex;
             gap: 1rem;
-            align-items: center;
+            margin-bottom: 1rem;
         }
+
         input[type="text"] {
-            padding: 0.75rem;
-            background: #000;
-            border: 1px solid #333;
+            flex: 1;
+            padding: 0.85rem 1.2rem;
+            background: #020617;
+            border: 1px solid var(--panel-border);
             color: #fff;
-            width: 300px;
-            border-radius: 2px;
+            font-size: 1rem;
+            border-radius: 8px;
+            font-family: inherit;
         }
-        button {
-            padding: 0.75rem 2rem;
-            background: var(--text-color);
-            color: var(--bg-color);
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+        }
+
+        button.btn-primary {
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: #fff;
             border: none;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
+            border-radius: 8px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            transition: all 0.2s;
         }
-        button:hover {
-            background: var(--accent);
-        }
-        .terminal {
-            background: #000;
-            color: #10b981;
-            font-family: monospace;
-            padding: 1rem;
-            height: 200px;
-            overflow-y: auto;
-            border: 1px solid #333;
+        button.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .preset-pills {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
             font-size: 0.85rem;
+            color: var(--text-muted);
         }
-        .terminal p { margin: 0.2rem 0; }
-        .log-error { color: var(--html-color); }
-        .log-success { color: var(--m2a-color); }
+
+        .pill {
+            background: #1e293b;
+            color: var(--text-main);
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: 1px solid transparent;
+        }
+        .pill:hover { background: #334155; border-color: var(--accent-purple); }
+
+        /* KPI STAT CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 1.25rem;
+            border-radius: 12px;
+            position: relative;
+        }
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+        }
+        .kpi-sub {
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .text-green { color: var(--success-green); }
+        .text-purple { color: var(--accent-purple); }
+        .text-yellow { color: var(--warning-yellow); }
+
+        /* CHARTS GRID */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel-chart {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        .panel-chart h3 {
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* SIDE BY SIDE COMPARISON */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .code-card {
+            background: #020617;
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            padding: 0.85rem 1.2rem;
+            background: #0f172a;
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .code-body {
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger-red); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success-green); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; }
+
+        /* LOG TERMINAL */
+        .terminal-panel {
+            background: #020617;
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .terminal-panel h3 {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        .terminal-log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            height: 150px;
+            overflow-y: auto;
+            color: #94a3b8;
+        }
+        .log-entry { margin-bottom: 0.3rem; }
+        .log-tag { font-weight: 600; margin-right: 0.5rem; }
+        .tag-info { color: #38bdf8; }
+        .tag-success { color: var(--success-green); }
+        .tag-warn { color: var(--warning-yellow); }
+        .tag-razor { color: #f472b6; }
     </style>
 </head>
 <body>
 
-    <h1>M2A Live AI Benchmarking Dashboard</h1>
-
-    <div class="dashboard-grid">
-        <div class="controls panel">
-            <input type="text" id="queryInput" value="is this in stock?" placeholder="Enter natural language query...">
-            <button onclick="runBenchmark()">Run Live Simulation</button>
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h1>RALEK M2A — AI Agent Dual-Reality Analytics</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
+                Real-Time Benchmark & Token Reduction Pipeline for Hackathon Pitch
+            </p>
         </div>
+        <div class="badge-live">Live Middleware Active</div>
+    </div>
 
-        <div class="panel">
-            <h3>Token Usage (Context Window Size)</h3>
-            <canvas id="tokenChart"></canvas>
+    <!-- CONTROLS & PRESETS -->
+    <div class="controls-card">
+        <div class="controls-form">
+            <input type="text" id="queryInput" value="is this in stock right now?" placeholder="Type an AI Agent query (e.g. 'I want to buy this', 'how heavy is it?')...">
+            <button class="btn-primary" onclick="runBenchmark()">Run Live Benchmark</button>
         </div>
-
-        <div class="panel">
-            <h3>Latency (ms)</h3>
-            <canvas id="latencyChart"></canvas>
+        <div class="preset-pills">
+            <span>Quick Presets for Pitch:</span>
+            <span class="pill" onclick="setPreset('is this in stock right now?')">📦 Stock Check</span>
+            <span class="pill" onclick="setPreset('I want to purchase this headphones')">💳 Purchase (BUY Intent)</span>
+            <span class="pill" onclick="setPreset('what are the dimensions and weight?')">📐 Technical Specs</span>
+            <span class="pill" onclick="setPreset('show me all available products')">🔍 Browse Catalog</span>
         </div>
+    </div>
 
-        <div class="panel" style="grid-column: 1 / -1;">
-            <h3>Simulation Logs</h3>
-            <div class="terminal" id="logTerminal">
-                <p>System initialized. Ready to run M2A benchmarks.</p>
+    <!-- KPI STAT CARDS -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">Token Savings</div>
+            <div class="kpi-value text-green" id="kpiTokenSaved">0%</div>
+            <div class="kpi-sub text-muted" id="kpiTokenSavedSub">0 tokens eliminated</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">LLM Cost / 1k Requests</div>
+            <div class="kpi-value text-purple" id="kpiCost">$-</div>
+            <div class="kpi-sub text-muted" id="kpiCostSub">vs $- standard HTML</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">ML Classified Intent</div>
+            <div class="kpi-value text-yellow" id="kpiIntent">-</div>
+            <div class="kpi-sub text-muted" id="kpiConfidence">Confidence: -</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Razorpay Link Action</div>
+            <div class="kpi-value" style="font-size: 1.2rem; margin-top: 0.5rem;" id="kpiRazorpay">Standby</div>
+            <div class="kpi-sub text-muted" id="kpiRazorpaySub">Triggers on BUY intent</div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="grid-2col">
+        <div class="panel-chart">
+            <h3>
+                <span>Token Window Size (Context Cost)</span>
+                <small style="color: var(--text-muted); font-size: 0.8rem;">Lower is better</small>
+            </h3>
+            <canvas id="tokenChart" height="200"></canvas>
+        </div>
+        <div class="panel-chart">
+            <h3>
+                <span>Bandwidth & Payload Size (KB)</span>
+                <small style="color: var(--text-muted); font-size: 0.8rem;">Lower is better</small>
+            </h3>
+            <canvas id="sizeChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- SIDE-BY-SIDE PAYLOAD COMPARISON -->
+    <h2 style="font-size: 1.2rem; margin-bottom: 1rem; color: #fff;">Payload & Structural Inspection</h2>
+    <div class="comparison-container">
+        <!-- HTML CARD -->
+        <div class="code-card">
+            <div class="code-header">
+                <span style="color: var(--danger-red);">❌ Without Middleware (Human HTML DOM)</span>
+                <span class="badge-danger" id="badgeHtmlTokens">0 Tokens</span>
             </div>
+            <div class="code-body" id="codeHtml">Run a benchmark above to compare payloads...</div>
+        </div>
+
+        <!-- M2A CARD -->
+        <div class="code-card">
+            <div class="code-header">
+                <span style="color: var(--success-green);">✅ With M2A Middleware (Pruned Agent JSON)</span>
+                <span class="badge-success" id="badgeM2aTokens">0 Tokens</span>
+            </div>
+            <div class="code-body" id="codeM2a">Run a benchmark above to compare payloads...</div>
+        </div>
+    </div>
+
+    <!-- TERMINAL LOGS -->
+    <div class="terminal-panel">
+        <h3>Live Execution Telemetry</h3>
+        <div class="terminal-log" id="logTerminal">
+            <div class="log-entry"><span class="log-tag tag-info">[SYSTEM]</span> Dashboard initialized. Ready to execute live benchmarks.</div>
         </div>
     </div>
 
     <script>
+        // CHARTS SETUP
         const ctxToken = document.getElementById('tokenChart').getContext('2d');
-        const ctxLatency = document.getElementById('latencyChart').getContext('2d');
+        const ctxSize = document.getElementById('sizeChart').getContext('2d');
 
         const tokenChart = new Chart(ctxToken, {
             type: 'bar',
             data: {
-                labels: ['Manual HTML Parsing', 'M2A JSON Middleware'],
+                labels: ['Raw HTML (Without Middleware)', 'M2A JSON (With Middleware)'],
                 datasets: [{
-                    label: 'Tokens Used',
                     data: [0, 0],
                     backgroundColor: ['#ef4444', '#10b981'],
+                    borderRadius: 6
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#f8fafc' } }
+                }
+            }
         });
 
-        const latencyChart = new Chart(ctxLatency, {
+        const sizeChart = new Chart(ctxSize, {
             type: 'bar',
             data: {
-                labels: ['HTML Generation', 'M2A Pruning + JSON'],
+                labels: ['Raw HTML Size (KB)', 'M2A JSON Size (KB)'],
                 datasets: [{
-                    label: 'Latency (ms)',
                     data: [0, 0],
-                    backgroundColor: ['#ef4444', '#10b981'],
+                    backgroundColor: ['#ef4444', '#c084fc'],
+                    borderRadius: 6
                 }]
             },
-            options: { scales: { y: { beginAtZero: true } } }
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#f8fafc' } }
+                }
+            }
         });
 
-        function logToTerminal(message, type = 'normal') {
+        function setPreset(queryText) {
+            document.getElementById('queryInput').value = queryText;
+            runBenchmark();
+        }
+
+        function logToTerminal(tag, message, tagClass = 'tag-info') {
             const terminal = document.getElementById('logTerminal');
             const time = new Date().toLocaleTimeString();
-            let className = '';
-            if (type === 'error') className = 'log-error';
-            if (type === 'success') className = 'log-success';
-            
-            terminal.innerHTML += `<p class="${className}">[${time}] ${message}</p>`;
+            terminal.innerHTML += `
+                <div class="log-entry">
+                    <span style="color: #64748b;">[${time}]</span>
+                    <span class="log-tag ${tagClass}">[${tag}]</span>
+                    <span>${message}</span>
+                </div>
+            `;
             terminal.scrollTop = terminal.scrollHeight;
         }
 
         async function runBenchmark() {
             const query = document.getElementById('queryInput').value;
-            logToTerminal(`Starting benchmark simulation with query: "${query}"...`);
-            
-            try {
-                const response = await fetch(`/api/benchmark?query=${encodeURIComponent(query)}`);
-                const data = await response.json();
-                
-                // Update Logs
-                logToTerminal(`❌ [MANUAL HTML] Fetching full product page...`, 'error');
-                logToTerminal(`❌ [MANUAL HTML] Payload size: ${data.html.size_kb} KB. Tokens consumed: ${data.html.tokens}`, 'error');
-                
-                logToTerminal(`✅ [M2A MIDDLEWARE] Sending query with Agent Signature...`, 'success');
-                logToTerminal(`✅ [M2A MIDDLEWARE] Intent Classified As: ${data.m2a.classified_intent}`, 'success');
-                logToTerminal(`✅ [M2A MIDDLEWARE] Payload size: ${data.m2a.size_kb} KB. Tokens consumed: ${data.m2a.tokens}`, 'success');
-                
-                const savings = ((1 - (data.m2a.tokens / data.html.tokens)) * 100).toFixed(1);
-                logToTerminal(`🎯 <b>RESULT: Middleware saved ${savings}% of token context.</b>`);
+            logToTerminal('REQUEST', `Intercepted Agent query: "${query}"`);
 
-                // Update Charts
+            try {
+                const res = await fetch(`/api/benchmark?query=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                // 1. Update KPI Cards
+                document.getElementById('kpiTokenSaved').innerText = `${data.metrics.pct_saved}%`;
+                document.getElementById('kpiTokenSavedSub').innerText = `${data.metrics.tokens_saved.toLocaleString()} tokens eliminated`;
+
+                document.getElementById('kpiCost').innerText = `$${data.metrics.m2a_cost_1k}`;
+                document.getElementById('kpiCostSub').innerText = `vs $${data.metrics.html_cost_1k} standard HTML`;
+
+                document.getElementById('kpiIntent').innerText = data.m2a.classified_intent;
+                document.getElementById('kpiConfidence').innerText = `Confidence: ${data.m2a.confidence_pct}% (${data.m2a.method})`;
+
+                if (data.m2a.payment_url) {
+                    document.getElementById('kpiRazorpay').innerHTML = `<a href="${data.m2a.payment_url}" target="_blank" style="color: #f472b6; text-decoration: underline;">Link Created ↗</a>`;
+                    document.getElementById('kpiRazorpaySub').innerText = `Razorpay API Success`;
+                    logToTerminal('RAZORPAY_API', `Generated Payment Link: ${data.m2a.payment_url}`, 'tag-razor');
+                } else {
+                    document.getElementById('kpiRazorpay').innerText = `Not Triggered`;
+                    document.getElementById('kpiRazorpaySub').innerText = `Intent is non-transactional`;
+                }
+
+                // 2. Update Charts
                 tokenChart.data.datasets[0].data = [data.html.tokens, data.m2a.tokens];
                 tokenChart.update();
-                
-                latencyChart.data.datasets[0].data = [data.html.latency_ms, data.m2a.latency_ms];
-                latencyChart.update();
+
+                sizeChart.data.datasets[0].data = [data.html.size_kb, data.m2a.size_kb];
+                sizeChart.update();
+
+                // 3. Update Side-by-Side Code Boxes
+                document.getElementById('badgeHtmlTokens').innerText = `${data.html.tokens} Tokens | ${data.html.size_kb} KB`;
+                document.getElementById('codeHtml').innerText = data.html.snippet;
+
+                document.getElementById('badgeM2aTokens').innerText = `${data.m2a.tokens} Tokens | ${data.m2a.size_kb} KB`;
+                document.getElementById('codeM2a').innerText = JSON.stringify(JSON.parse(data.m2a.snippet), null, 2);
+
+                // 4. Update Logs
+                logToTerminal('DETECTOR', `Client identified as AI Agent (Signature-Agent: 1)`);
+                logToTerminal('CLASSIFIER', `Natural language query classified as '${data.m2a.classified_intent}' with ${data.m2a.confidence_pct}% confidence.`);
+                logToTerminal('PRUNER', `Pruned ${data.m2a.fields_removed} unnecessary JSON keys. Reduced size from ${data.html.size_kb}KB to ${data.m2a.size_kb}KB.`, 'tag-success');
+                logToTerminal('BENCHMARK', `Saved ${data.metrics.pct_saved}% token context. Processed in ${data.m2a.latency_ms}ms.`, 'tag-success');
 
             } catch (err) {
-                logToTerminal('Error running benchmark: ' + err, 'error');
+                logToTerminal('ERROR', `Failed to run benchmark: ${err}`, 'tag-warn');
             }
         }
+
+        // Auto-run first benchmark on page load
+        window.onload = runBenchmark;
     </script>
 </body>
 </html>

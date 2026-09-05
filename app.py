@@ -212,7 +212,7 @@ def dashboard():
 
 @app.route("/api/benchmark")
 def api_benchmark():
-    """Runs a live benchmark comparing HTML vs M2A JSON for the dashboard."""
+    """Runs a live benchmark comparing HTML vs M2A JSON for the detailed dashboard."""
     import time
     import tiktoken
     from html.parser import HTMLParser
@@ -238,7 +238,9 @@ def api_benchmark():
     
     extractor = HTMLTextExtractor()
     extractor.feed(html_content)
-    html_tokens = len(enc.encode(' '.join(extractor.res)))
+    extracted_html_text = ' '.join(extractor.res)
+    html_tokens = len(enc.encode(extracted_html_text))
+    html_size_kb = round(len(html_content.encode('utf-8')) / 1024, 2)
     
     # 2. Simulate JSON Request
     start = time.time()
@@ -253,21 +255,49 @@ def api_benchmark():
     
     json_data = json_response.get_data(as_text=True)
     json_tokens = len(enc.encode(json_data))
+    json_size_kb = round(len(json_data.encode('utf-8')) / 1024, 2)
     
     parsed_json = json_response.get_json()
     classified_intent = parsed_json.get("intent", {}).get("classified_as", "UNKNOWN")
+    confidence = parsed_json.get("intent", {}).get("confidence", 1.0)
+    classification_method = parsed_json.get("intent", {}).get("method", "N/A")
+    payment_info = parsed_json.get("payment", {})
+    token_savings = parsed_json.get("token_savings", {})
+    
+    # Cost math (GPT-4o standard input rate: $2.50 per 1M tokens)
+    html_cost_per_1k_req = round((html_tokens * 1000 / 1000000) * 2.50, 4)
+    m2a_cost_per_1k_req = round((json_tokens * 1000 / 1000000) * 2.50, 4)
+    tokens_saved = html_tokens - json_tokens
+    pct_saved = round((tokens_saved / html_tokens) * 100, 1) if html_tokens > 0 else 0
     
     return jsonify({
+        "query_input": query,
+        "product_id": product_id,
+        "product_name": html_product.get("name"),
+        "metrics": {
+            "tokens_saved": tokens_saved,
+            "pct_saved": pct_saved,
+            "html_cost_1k": html_cost_per_1k_req,
+            "m2a_cost_1k": m2a_cost_per_1k_req,
+            "cost_savings_pct": pct_saved,
+            "bandwidth_saved_kb": round(html_size_kb - json_size_kb, 2)
+        },
         "html": {
-            "latency_ms": round(html_latency + 15, 2), # Add fake network latency for realism
+            "latency_ms": round(html_latency + 12, 2),
             "tokens": html_tokens,
-            "size_kb": round(len(html_content.encode('utf-8')) / 1024, 2)
+            "size_kb": html_size_kb,
+            "snippet": extracted_html_text[:350] + "..."
         },
         "m2a": {
-            "latency_ms": round(json_latency + 15, 2),
+            "latency_ms": round(json_latency + 12, 2),
             "tokens": json_tokens,
-            "size_kb": round(len(json_data.encode('utf-8')) / 1024, 2),
-            "classified_intent": classified_intent
+            "size_kb": json_size_kb,
+            "classified_intent": classified_intent,
+            "confidence_pct": round(confidence * 100, 1),
+            "method": classification_method,
+            "fields_removed": token_savings.get("fields_removed", 0),
+            "payment_url": payment_info.get("payment_link_url"),
+            "snippet": json_data
         }
     })
 

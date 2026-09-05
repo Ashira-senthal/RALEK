@@ -34,10 +34,10 @@
             <div class="product-panel">
                 <div class="product-card-cinematic">
                     <div class="product-image-col">
-                        <img class="parallax-img" src="{{ product.image_url }}" alt="{{ product.name }}">
+                        <img class="parallax-img" src="{{ product.images[0] }}" alt="{{ product.name }}">
                     </div>
                     <div class="product-info-col">
-                        <div class="product-category">ID: {{ product.id }} | Stock: {{ product.stock }}</div>
+                        <div class="product-category">ID: {{ product.id }} | Stock: {{ product.stock_count }}</div>
                         <h2 class="product-name">{{ product.name }}</h2>
                         <div class="product-price">₹{{ "{:,.0f}".format(product.price) }}</div>
                         <p class="product-desc">{{ product.description }}</p>

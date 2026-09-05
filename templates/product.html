@@ -72,7 +72,7 @@
 
     <!-- HERO -->
     <section class="product-hero">
-        <img class="hero-img" src="{{ product.image_url }}" alt="{{ product.name }}">
+        <img class="hero-img" src="{{ product.images[0] }}" alt="{{ product.name }}">
         <div class="product-hero-content">
             <div class="product-category" style="color: #fff;">{{ product.category }}</div>
             <h1 style="font-size: 5vw; margin-bottom: 1rem;">{{ product.name }}</h1>
@@ -86,16 +86,17 @@
         <div class="specs-text">
             <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Technical Details</h2>
             <p class="product-desc">{{ product.description }}</p>
-            <p style="color: #666; margin-top: 2rem;">Stock Available: {{ product.stock }} units</p>
+            <p style="color: #666; margin-top: 2rem;">Stock Available: {{ product.stock_count }} units</p>
         </div>
         <table class="specs-table">
             <tbody>
-                {% for key, value in product.specs.items() %}
-                <tr>
-                    <th>{{ key|title }}</th>
-                    <td>{{ value }}</td>
-                </tr>
-                {% endfor %}
+                <tr><th>Brand</th><td>{{ product.brand }}</td></tr>
+                <tr><th>Category</th><td>{{ product.category }}</td></tr>
+                <tr><th>Materials</th><td>{{ product.materials | join(', ') }}</td></tr>
+                <tr><th>Sizes</th><td>{{ product.sizes | join(', ') }}</td></tr>
+                <tr><th>Colors</th><td>{{ product.colors | join(', ') }}</td></tr>
+                <tr><th>Dimensions (L x W x H)</th><td>{{ product.dimensions.length_cm }} x {{ product.dimensions.width_cm }} x {{ product.dimensions.height_cm }} cm</td></tr>
+                <tr><th>Weight</th><td>{{ product.dimensions.weight_g }} g</td></tr>
             </tbody>
         </table>
     </section>

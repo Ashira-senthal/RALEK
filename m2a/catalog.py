@@ -13,9 +13,8 @@ CATALOG = {
         "category": "Electronics > Audio",
         "brand": "AuraX",
         "images": [
-            "https://example.com/images/prod_001_main.jpg",
-            "https://example.com/images/prod_001_side.jpg",
-            "https://example.com/images/prod_001_lifestyle.jpg"
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=1000&auto=format&fit=crop"
         ],
         "dimensions": {
             "weight_g": 250,
@@ -43,9 +42,8 @@ CATALOG = {
         "category": "Furniture > Office",
         "brand": "Lumina Workspace",
         "images": [
-            "https://example.com/images/prod_002_front.jpg",
-            "https://example.com/images/prod_002_back.jpg",
-            "https://example.com/images/prod_002_tilt.jpg"
+            "https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?q=80&w=1000&auto=format&fit=crop"
         ],
         "dimensions": {
             "weight_g": 18500,
@@ -73,10 +71,8 @@ CATALOG = {
         "category": "Apparel > Footwear",
         "brand": "Velocity Athletics",
         "images": [
-            "https://example.com/images/prod_003_main.jpg",
-            "https://example.com/images/prod_003_tread.jpg",
-            "https://example.com/images/prod_003_action.jpg",
-            "https://example.com/images/prod_003_detail.jpg"
+            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=1000&auto=format&fit=crop"
         ],
         "dimensions": {
             "weight_g": 210,
@@ -97,16 +93,15 @@ CATALOG = {
     },
     "prod_004": {
         "id": "prod_004",
-        "name": "Kawa 75% Mechanical Keyboard (Hot-Swappable)",
+        "name": "Kawa 75% Mechanical Keyboard",
         "price": 6500,
         "currency": "INR",
         "description": "The ultimate enthusiast keyboard. The Kawa 75% features a gasket-mounted design for a bouncy typing feel and deep acoustic signature. Comes pre-lubricated with custom linear switches. Hot-swappable PCB allows you to change switches without soldering. Includes double-shot PBT keycaps and per-key RGB backlighting with 18 dynamic effects.",
         "category": "Electronics > Peripherals",
         "brand": "Kawa Peripherals",
         "images": [
-            "https://example.com/images/prod_004_top.jpg",
-            "https://example.com/images/prod_004_angle.jpg",
-            "https://example.com/images/prod_004_rgb.jpg"
+            "https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=1000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=1000&auto=format&fit=crop"
         ],
         "dimensions": {
             "weight_g": 950,

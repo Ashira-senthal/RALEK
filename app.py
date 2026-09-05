@@ -12,6 +12,7 @@ Routes:
 """
 
 import os
+from collections import namedtuple
 import time
 import tiktoken
 from flask_cors import CORS

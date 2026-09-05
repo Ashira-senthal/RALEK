@@ -1,79 +1,128 @@
-# M2A — Merchant-to-Agent Bridge
+<div align="center">
+  <img src="assets/logo.png" alt="RALEK M2A Logo" width="600" />
+</div>
 
-**Token-Optimized Dual-Reality Storefront for AI Agents**
+<h1 align="center">RALEK M2A</h1>
+<p align="center">
+  <b>The Dual-Reality E-Commerce Infrastructure for the Agentic Web</b><br/>
+  <a href="#-about-the-project">About</a> •
+  <a href="#%EF%B8%8F-architecture">Architecture</a> •
+  <a href="#-technologies-used">Tech Stack</a> •
+  <a href="#-installation--getting-started">Installation</a> •
+  <a href="#-roadmap--known-fixes-todos">Roadmap</a>
+</p>
 
-M2A is a Flask-based middleware routing system designed for the **Razorpay AI Buildathon 2026 (AI Growth & Agentic Commerce Track)**. 
+<div align="center">
 
-It serves two different representations of the same e-commerce storefront depending on who (or what) is requesting it:
-- **For Humans**: A full visual frontend (Y2K aesthetic, glassmorphism UI) returning standard HTML.
-- **For AI Agents**: Bypasses the DOM entirely to return a hyper-lightweight, intent-pruned, data-only payload (reducing token consumption by up to 95%). For purchase intents, it attaches a live Razorpay test-mode payment link.
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
+[![Razorpay](https://img.shields.io/badge/Razorpay-Integrated-10b981.svg)](https://razorpay.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why this exists (The Token Economics Problem)
+</div>
 
-AI agents don't see web pages like humans do; they read raw HTML, DOM trees, or screenshots. Every byte of navigation chrome, inline CSS, tracking pixels, and boilerplate text costs the agent **tokens** (and therefore money) to parse. 
+## 🌟 About The Project
 
-> *Reference: Cloudflare measured their own blog page at 16,180 tokens as raw HTML vs. 3,150 tokens as markdown.*
+Current e-commerce websites are designed for human eyes—heavy with CSS, animations, and massive DOM trees. When AI Shopping Agents (like ChatGPT, AutoGPT, or custom bots) try to crawl these sites, they waste massive amounts of LLM context tokens, increase latency, and cost API money.
 
-If reading a merchant's site costs an AI buyer too many tokens relative to the value of the information, the agent either abandons the site (lost sale) or reads a partial/cached version and hallucinates (broken trust). M2A solves this on the merchant side.
+**RALEK M2A (Merchant-to-Agent)** is a middleware layer that creates a "Dual-Reality" storefront:
+- 🧑 **For Humans:** Renders a beautiful, cinematic, scroll-driven website.
+- 🤖 **For AI Agents:** Intercepts the request, uses NLP to classify shopping intent, prunes unnecessary visual data, and returns an ultra-lightweight JSON payload—complete with a dynamic **Razorpay checkout link**.
 
-## Architecture
+---
 
-```text
-                       [Incoming Request]
-                                |
-               +----------------+----------------+
-               |                                 |
-         [Human Browser]                   [AI Buyer Agent]
-       (Accept: text/html)        (Accept: application/vnd.m2a+json)
-               |                                 |
-               v                                 v
-     +-------------------+              +-------------------+
-     | Human UI Layer    |              | Detection & ACP   |
-     | Glassmorphism/Y2K |              | Negotiation Layer |
-     | Storefront        |              +-------------------+
-     +-------------------+                        |
-                                                  v
-                                        +-------------------+
-                                        | Hybrid Intent     |
-                                        | Router/Classifier |
-                                        +-------------------+
-                                           /      |      \
-                            [Stock/Specs]   [Compare]   [Buy Intent]
-                                  |               |           |
-                                  |               |           v
-                                  |               |     +-------------------+
-                                  |               |     | Razorpay API      |
-                                  |               |     | Order/PaymentLink |
-                                  |               |     +-------------------+
-                                  \               |           /
-                                   \              |          /
-                                    v             v         v
-                                    +-----------------------+
-                                    | Semantic Pruner       |
-                                    | (<500 tokens payload) |
-                                    +-----------------------+
-                                                |
-                                                v
-                                    +-----------------------+
-                                    | Immutable Audit Trail |
-                                    | (audit_trail.jsonl)   |
-                                    +-----------------------+
+## 🏛️ Architecture
+
+<div align="center">
+  <img src="assets/architecture.png" alt="RALEK M2A Architecture Flowchart" width="800" />
+</div>
+
+> 💡 **Image Idea for this section (Future Update):** *An animated GIF showing a side-by-side terminal. On the left, an AI downloads 5KB of raw HTML. On the right, the M2A middleware instantly routes the agent to a 500-byte JSON file and a Razorpay link.*
+
+### The 5 Core Layers:
+1. **Detection (`detector.py`):** Passive (User-Agent) and Active (`Signature-Agent: 1`) bot detection. Uses `Vary` HTTP headers to protect SEO.
+2. **Classification (`classifier.py`):** Machine Learning (TF-IDF + Logistic Regression) categorizes natural language queries into `BUY`, `STOCK`, `SPECS`, or `BROWSE`.
+3. **Semantic Pruner (`pruner.py`):** Strips 80%+ of irrelevant JSON keys based on intent (e.g., removing dimensions when an AI only asks for stock count).
+4. **Payments (`payments.py`):** Dynamically generates Razorpay checkout links if intent is `BUY`. Includes a hard AI spend-cap for safety.
+5. **Audit Trail (`audit.py`):** Immutable `.jsonl` telemetry logging of every AI interaction.
+
+---
+
+## 🚀 Technologies Used
+
+- **Backend Core:** `Python 3`, `Flask`, `Gunicorn`
+- **Machine Learning / NLP:** `scikit-learn`, `nlpaug` (for typo resilience and data augmentation)
+- **Token Math:** `tiktoken` (OpenAI cl100k_base deterministic token counting)
+- **Payments:** `Razorpay Python SDK`
+- **Frontend (Humans & Dashboard):** HTML5, GSAP, CSS3, Chart.js
+- **Deployment:** Render / Heroku-ready (`Procfile` included)
+
+---
+
+## 💻 Installation & Getting Started
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/Ashira-senthal/RALEK.git
+cd RALEK
 ```
 
-## Setup & Run
+### 2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **Configure environment:**
-   Create a `.env` file (see `.env.example` when available) with your Razorpay Test API keys.
-3. **Run the application:**
-   ```bash
-   python app.py
-   ```
+### 3. Environment Variables
+Create a `.env` file in the root directory and add your test Razorpay keys:
+```env
+RAZORPAY_KEY_ID="rzp_test_xxxxxxxxxxx"
+RAZORPAY_KEY_SECRET="xxxxxxxxxxxxxxx"
+```
 
-## Track Alignment (Razorpay AI Buildathon 2026)
-- **Every money action explainable, bounded, and gated**: Enabled via the immutable JSONL audit trail and hard spend-cap limits applied before payment link generation.
-- **Show the audit trail and one failure handled gracefully**: The test harness demonstrates graceful failure when handling ambiguous intents.
-- **Deterministic solutions where AI is unnecessary**: Uses a hybrid classifier (rules-first, ML-fallback) rather than forcing LLMs to do basic routing.
+### 4. Run the Application
+```bash
+python3 app.py
+```
+The server will start at `http://localhost:5000`.
+
+> 💡 **Image Idea for this section (Future Update):** *A clean, dark-mode screenshot of the terminal booting up the Flask server and initializing the Machine Learning model.*
+
+---
+
+## 🕹️ Usage & Testing
+
+### The Human View
+Open your browser and navigate to `http://localhost:5000` to see the heavy cinematic frontend.
+
+### Live Analytics Dashboard (For Demos)
+Visit `http://localhost:5000/dashboard` to test AI natural language queries and see real-time token reduction metrics, side-by-side payload comparisons, and Razorpay links.
+
+> 💡 **Image Idea for this section (Future Update):** *A high-resolution screenshot of the Dashboard UI with the Token Savings chart and the green "Link Created" button highlighted.*
+
+### AI Agent API Simulation
+You can use `curl` to simulate an AI agent requesting a product:
+
+```bash
+# Simulating a BUY intent via Natural Language
+curl -H "Signature-Agent: 1" \
+     -H "Accept: application/vnd.m2a+json" \
+     "http://localhost:5000/product/prod_001?query=I+want+to+purchase+this"
+```
+
+---
+
+## 🚧 Roadmap & Known Fixes (TODOs)
+
+While the core MVP is fully functional and deployed, the following fixes and expansions are scheduled for the next phase:
+
+- [ ] **Database Adapters:** Decouple `m2a/catalog.py` to support plug-and-play PostgreSQL and MongoDB connections.
+- [ ] **Multi-Currency Support:** Expand Razorpay integration beyond INR to handle global Agent transactions.
+- [ ] **Caching Layer:** Implement Redis caching for intent classification to reduce inference latency.
+- [ ] **Shopify App Packaging:** Package the `m2a` core into a 1-click installable Shopify plugin.
+- [ ] **Enhanced Authentication:** Add OAuth/OIDC validation for trusted AI agents.
+- [ ] **Fix:** Minor JSON serialization edge cases when products are missing image arrays.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License.

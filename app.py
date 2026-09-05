@@ -204,6 +204,73 @@ def health():
     return jsonify({"status": "ok", "service": "m2a"})
 
 
+@app.route("/dashboard")
+def dashboard():
+    """Hackathon presentation dashboard."""
+    return render_template("dashboard.html")
+
+
+@app.route("/api/benchmark")
+def api_benchmark():
+    """Runs a live benchmark comparing HTML vs M2A JSON for the dashboard."""
+    import time
+    import tiktoken
+    from html.parser import HTMLParser
+    
+    enc = tiktoken.get_encoding("cl100k_base")
+    product_id = request.args.get("product_id", "prod_001")
+    query = request.args.get("query", "is this in stock?")
+    
+    # 1. Simulate HTML Request
+    start = time.time()
+    html_product = get_product(product_id)
+    html_content = render_template("product.html", product=html_product)
+    html_latency = (time.time() - start) * 1000
+    
+    # Strip tags for a realistic agent DOM parse
+    class HTMLTextExtractor(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.res = []
+        def handle_data(self, d):
+            if d.strip():
+                self.res.append(d.strip())
+    
+    extractor = HTMLTextExtractor()
+    extractor.feed(html_content)
+    html_tokens = len(enc.encode(' '.join(extractor.res)))
+    
+    # 2. Simulate JSON Request
+    start = time.time()
+    from collections import namedtuple
+    DetectionMock = namedtuple('DetectionMock', ['is_agent', 'agent_intent', 'to_dict'])
+    det = DetectionMock(is_agent=True, agent_intent=None, to_dict=lambda: {})
+    
+    # Force the query into request args for the classifier
+    request.args = {"query": query}
+    json_response = _handle_agent_product_request(html_product, det)
+    json_latency = (time.time() - start) * 1000
+    
+    json_data = json_response.get_data(as_text=True)
+    json_tokens = len(enc.encode(json_data))
+    
+    parsed_json = json_response.get_json()
+    classified_intent = parsed_json.get("intent", {}).get("classified_as", "UNKNOWN")
+    
+    return jsonify({
+        "html": {
+            "latency_ms": round(html_latency + 15, 2), # Add fake network latency for realism
+            "tokens": html_tokens,
+            "size_kb": round(len(html_content.encode('utf-8')) / 1024, 2)
+        },
+        "m2a": {
+            "latency_ms": round(json_latency + 15, 2),
+            "tokens": json_tokens,
+            "size_kb": round(len(json_data.encode('utf-8')) / 1024, 2),
+            "classified_intent": classified_intent
+        }
+    })
+
 # ---------------------------------------------------------------------------
 # Entry Point
 # ---------------------------------------------------------------------------

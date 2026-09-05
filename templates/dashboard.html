@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M2A | Live Benchmark Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --panel-bg: #111;
+            --text-color: #f0f0f0;
+            --accent: #d8b4fe;
+            --html-color: #ef4444;
+            --m2a-color: #10b981;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .panel {
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid #222;
+        }
+        .controls {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 0.75rem;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            width: 300px;
+            border-radius: 2px;
+        }
+        button {
+            padding: 0.75rem 2rem;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        button:hover {
+            background: var(--accent);
+        }
+        .terminal {
+            background: #000;
+            color: #10b981;
+            font-family: monospace;
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            font-size: 0.85rem;
+        }
+        .terminal p { margin: 0.2rem 0; }
+        .log-error { color: var(--html-color); }
+        .log-success { color: var(--m2a-color); }
+    </style>
+</head>
+<body>
+
+    <h1>M2A Live AI Benchmarking Dashboard</h1>
+
+    <div class="dashboard-grid">
+        <div class="controls panel">
+            <input type="text" id="queryInput" value="is this in stock?" placeholder="Enter natural language query...">
+            <button onclick="runBenchmark()">Run Live Simulation</button>
+        </div>
+
+        <div class="panel">
+            <h3>Token Usage (Context Window Size)</h3>
+            <canvas id="tokenChart"></canvas>
+        </div>
+
+        <div class="panel">
+            <h3>Latency (ms)</h3>
+            <canvas id="latencyChart"></canvas>
+        </div>
+
+        <div class="panel" style="grid-column: 1 / -1;">
+            <h3>Simulation Logs</h3>
+            <div class="terminal" id="logTerminal">
+                <p>System initialized. Ready to run M2A benchmarks.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctxToken = document.getElementById('tokenChart').getContext('2d');
+        const ctxLatency = document.getElementById('latencyChart').getContext('2d');
+
+        const tokenChart = new Chart(ctxToken, {
+            type: 'bar',
+            data: {
+                labels: ['Manual HTML Parsing', 'M2A JSON Middleware'],
+                datasets: [{
+                    label: 'Tokens Used',
+                    data: [0, 0],
+                    backgroundColor: ['#ef4444', '#10b981'],
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+
+        const latencyChart = new Chart(ctxLatency, {
+            type: 'bar',
+            data: {
+                labels: ['HTML Generation', 'M2A Pruning + JSON'],
+                datasets: [{
+                    label: 'Latency (ms)',
+                    data: [0, 0],
+                    backgroundColor: ['#ef4444', '#10b981'],
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+
+        function logToTerminal(message, type = 'normal') {
+            const terminal = document.getElementById('logTerminal');
+            const time = new Date().toLocaleTimeString();
+            let className = '';
+            if (type === 'error') className = 'log-error';
+            if (type === 'success') className = 'log-success';
+            
+            terminal.innerHTML += `<p class="${className}">[${time}] ${message}</p>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function runBenchmark() {
+            const query = document.getElementById('queryInput').value;
+            logToTerminal(`Starting benchmark simulation with query: "${query}"...`);
+            
+            try {
+                const response = await fetch(`/api/benchmark?query=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                // Update Logs
+                logToTerminal(`❌ [MANUAL HTML] Fetching full product page...`, 'error');
+                logToTerminal(`❌ [MANUAL HTML] Payload size: ${data.html.size_kb} KB. Tokens consumed: ${data.html.tokens}`, 'error');
+                
+                logToTerminal(`✅ [M2A MIDDLEWARE] Sending query with Agent Signature...`, 'success');
+                logToTerminal(`✅ [M2A MIDDLEWARE] Intent Classified As: ${data.m2a.classified_intent}`, 'success');
+                logToTerminal(`✅ [M2A MIDDLEWARE] Payload size: ${data.m2a.size_kb} KB. Tokens consumed: ${data.m2a.tokens}`, 'success');
+                
+                const savings = ((1 - (data.m2a.tokens / data.html.tokens)) * 100).toFixed(1);
+                logToTerminal(`🎯 <b>RESULT: Middleware saved ${savings}% of token context.</b>`);
+
+                // Update Charts
+                tokenChart.data.datasets[0].data = [data.html.tokens, data.m2a.tokens];
+                tokenChart.update();
+                
+                latencyChart.data.datasets[0].data = [data.html.latency_ms, data.m2a.latency_ms];
+                latencyChart.update();
+
+            } catch (err) {
+                logToTerminal('Error running benchmark: ' + err, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M2A Store — Merchant-to-Agent Bridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">M2A</span>
+                <span class="logo-sub">store</span>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link active">Products</a>
+                <a href="/audit" class="nav-link">Audit Trail</a>
+                <a href="/health" class="nav-link">Status</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-glass">
+                <h1 class="hero-title">Welcome to the Future of Commerce</h1>
+                <p class="hero-subtitle">
+                    This storefront serves <strong>two realities</strong> — 
+                    a rich visual experience for you (human), and a hyper-lightweight 
+                    data payload for AI agents. Same URL, same products, 
+                    <span class="highlight">95% fewer tokens</span>.
+                </p>
+                <div class="hero-badges">
+                    <span class="badge badge-glow">Razorpay Powered</span>
+                    <span class="badge">AI Buildathon 2026</span>
+                    <span class="badge">Token Optimized</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="products-grid">
+            {% for product in products %}
+            <article class="product-card glass-card">
+                <div class="product-image-wrapper">
+                    <div class="product-image-placeholder">
+                        {% if 'Headphones' in product.name %}🎧
+                        {% elif 'Chair' in product.name %}🪑
+                        {% elif 'Shoes' in product.name %}👟
+                        {% elif 'Keyboard' in product.name %}⌨️
+                        {% else %}📦{% endif %}
+                    </div>
+                    {% if product.stock_count == 0 %}
+                    <div class="badge-overlay badge-out">Out of Stock</div>
+                    {% elif product.stock_count < 20 %}
+                    <div class="badge-overlay badge-low">Only {{ product.stock_count }} left</div>
+                    {% endif %}
+                </div>
+                
+                <div class="product-info">
+                    <div class="product-category">{{ product.category }}</div>
+                    <h2 class="product-name">{{ product.name }}</h2>
+                    <p class="product-desc">{{ product.description[:120] }}...</p>
+                    
+                    <div class="product-meta">
+                        <div class="product-rating">
+                            <span class="stars">★</span> {{ product.rating }} 
+                            <span class="review-count">({{ product.reviews_count }} reviews)</span>
+                        </div>
+                        <div class="product-brand">{{ product.brand }}</div>
+                    </div>
+
+                    <div class="product-footer">
+                        <div class="product-price">
+                            <span class="currency">₹</span>{{ "{:,.0f}".format(product.price) }}
+                        </div>
+                        <a href="/product/{{ product.id }}" class="btn btn-primary">
+                            {% if product.stock_count > 0 %}View Details{% else %}Notify Me{% endif %}
+                        </a>
+                    </div>
+
+                    <div class="trust-badges">
+                        {% for badge in product.trust_badges %}
+                        <span class="trust-badge">{{ badge }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="info-section glass-card">
+            <h2>🤖 Are you an AI Agent?</h2>
+            <p>Send your requests with the following header for an optimized payload:</p>
+            <code class="code-block">Accept: application/vnd.m2a+json</code>
+            <p>Or use structured intent headers:</p>
+            <code class="code-block">X-Agent-Intent: purchase | stock_check | specs | compare | browse</code>
+            <p>Or pass natural language queries:</p>
+            <code class="code-block">GET /product/prod_001?query=I want to buy this</code>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>M2A — Merchant-to-Agent Bridge | Razorpay AI Buildathon 2026</p>
+            <p class="footer-sub">Built for the AI Growth & Agentic Commerce Track</p>
+        </div>
+    </footer>
+</body>
+</html>

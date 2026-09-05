@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Product Not Found | M2A Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">M2A</span>
+                <span class="logo-sub">store</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="error-page glass-card">
+            <h1 class="error-code">404</h1>
+            <p class="error-message">Product <code>{{ product_id }}</code> was not found.</p>
+            <a href="/" class="btn btn-primary">← Back to Store</a>
+        </section>
+    </main>
+</body>
+</html>

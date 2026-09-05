@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} — M2A Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">M2A</span>
+                <span class="logo-sub">store</span>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Back to Products</a>
+                <a href="/audit" class="nav-link">Audit Trail</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="product-detail">
+            <div class="product-detail-top glass-card">
+                <div class="product-detail-image">
+                    <div class="product-image-placeholder large">
+                        {% if 'Headphones' in product.name %}🎧
+                        {% elif 'Chair' in product.name %}🪑
+                        {% elif 'Shoes' in product.name %}👟
+                        {% elif 'Keyboard' in product.name %}⌨️
+                        {% else %}📦{% endif %}
+                    </div>
+                </div>
+
+                <div class="product-detail-info">
+                    <div class="product-category">{{ product.category }}</div>
+                    <h1 class="product-detail-name">{{ product.name }}</h1>
+                    <div class="product-brand-detail">by {{ product.brand }}</div>
+
+                    <div class="product-rating-detail">
+                        <span class="stars-large">★</span> {{ product.rating }}
+                        <span class="review-count">({{ product.reviews_count }} reviews)</span>
+                    </div>
+
+                    <div class="product-price-detail">
+                        <span class="currency">₹</span>{{ "{:,.0f}".format(product.price) }}
+                    </div>
+
+                    <p class="product-desc-detail">{{ product.description }}</p>
+
+                    <div class="product-options">
+                        {% if product.colors %}
+                        <div class="option-group">
+                            <label>Colors</label>
+                            <div class="option-chips">
+                                {% for color in product.colors %}
+                                <span class="chip">{{ color }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if product.sizes %}
+                        <div class="option-group">
+                            <label>Sizes</label>
+                            <div class="option-chips">
+                                {% for size in product.sizes %}
+                                <span class="chip">{{ size }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="product-stock">
+                        {% if product.stock_count > 0 %}
+                        <span class="stock-badge in-stock">✓ In Stock ({{ product.stock_count }} units)</span>
+                        {% else %}
+                        <span class="stock-badge out-stock">✗ Out of Stock</span>
+                        {% endif %}
+                    </div>
+
+                    {% if product.stock_count > 0 %}
+                    <button class="btn btn-primary btn-large">Buy Now — ₹{{ "{:,.0f}".format(product.price) }}</button>
+                    {% else %}
+                    <button class="btn btn-secondary btn-large">Notify When Available</button>
+                    {% endif %}
+
+                    <div class="trust-badges">
+                        {% for badge in product.trust_badges %}
+                        <span class="trust-badge">{{ badge }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-detail-sections">
+                <div class="detail-section glass-card">
+                    <h3>📐 Specifications</h3>
+                    <table class="specs-table">
+                        <tr><td>Weight</td><td>{{ product.dimensions.weight_g }}g</td></tr>
+                        <tr><td>Dimensions</td><td>{{ product.dimensions.length_cm }} × {{ product.dimensions.width_cm }} × {{ product.dimensions.height_cm }} cm</td></tr>
+                        <tr><td>Materials</td><td>{{ product.materials | join(', ') }}</td></tr>
+                        <tr><td>SKU</td><td>{{ product.sku }}</td></tr>
+                    </table>
+                </div>
+
+                <div class="detail-section glass-card">
+                    <h3>🚚 Shipping</h3>
+                    <p>{{ product.shipping_info }}</p>
+                </div>
+
+                <div class="detail-section glass-card">
+                    <h3>↩️ Returns</h3>
+                    <p>{{ product.return_policy }}</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>M2A — Merchant-to-Agent Bridge | Razorpay AI Buildathon 2026</p>
+        </div>
+    </footer>
+</body>
+</html>

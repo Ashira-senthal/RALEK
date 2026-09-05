@@ -109,5 +109,52 @@
             <p class="footer-sub">Built for the AI Growth & Agentic Commerce Track</p>
         </div>
     </footer>
+
+    <!-- Liquid Glass JS Dependencies -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='liquid_glass.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='liquid_container.js') }}"></script>
+    <script src="{{ url_for('static', filename='liquid_button.js') }}"></script>
+
+    <script>
+        // Convert standard action buttons into complex WebGL Liquid Glass buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const productFooters = document.querySelectorAll('.product-footer');
+            
+            productFooters.forEach(footer => {
+                const actionBtn = footer.querySelector('a.btn-primary');
+                if (!actionBtn) return;
+
+                const href = actionBtn.getAttribute('href');
+                const text = actionBtn.innerText.trim();
+                
+                // Hide the standard DOM button
+                actionBtn.style.display = 'none';
+
+                // Create a nested liquid glass structure to make it complex to test
+                const glassContainer = new Container({
+                    borderRadius: 12,
+                    type: 'rounded',
+                    tintOpacity: 0.1
+                });
+
+                const glassBtn = new Button({
+                    text: text,
+                    size: 14,
+                    type: 'rounded',
+                    onClick: () => {
+                        window.location.href = href;
+                    }
+                });
+
+                // Apply some basic layout fixing to the glass container
+                glassContainer.element.style.transform = 'scale(0.8)';
+                glassContainer.element.style.transformOrigin = 'right center';
+
+                glassContainer.addChild(glassBtn);
+                footer.appendChild(glassContainer.element);
+            });
+        });
+    </script>
 </body>
 </html>

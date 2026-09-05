@@ -127,5 +127,42 @@
             <p>M2A — Merchant-to-Agent Bridge | Razorpay AI Buildathon 2026</p>
         </div>
     </footer>
+
+    <!-- Liquid Glass JS Dependencies -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='liquid_glass.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='liquid_container.js') }}"></script>
+    <script src="{{ url_for('static', filename='liquid_button.js') }}"></script>
+
+    <script>
+        // Convert the Buy button into a complex WebGL Liquid Glass button
+        document.addEventListener('DOMContentLoaded', () => {
+            const buyBtn = document.querySelector('.btn-primary.btn-large');
+            if (!buyBtn) return;
+
+            const text = buyBtn.innerText.trim();
+            buyBtn.style.display = 'none'; // Hide DOM button
+
+            const glassContainer = new Container({
+                borderRadius: 24,
+                type: 'pill',
+                tintOpacity: 0.2
+            });
+
+            const glassBtn = new Button({
+                text: text,
+                size: 16,
+                type: 'pill',
+                onClick: () => {
+                    alert('Agent checkout initiated via WebGL interaction!');
+                }
+            });
+
+            glassContainer.addChild(glassBtn);
+            
+            // Insert it where the old button was
+            buyBtn.parentNode.insertBefore(glassContainer.element, buyBtn.nextSibling);
+        });
+    </script>
 </body>
 </html>
